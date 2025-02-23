@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maison Connectée</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
+        h1 { color: #333; }
+        .container { display: flex; justify-content: center; gap: 20px; }
+        .box { padding: 20px; border: 2px solid #333; border-radius: 10px; width: 200px; }
+        .temperature { background: #FFDDC1; }
+        .humidite { background: #C1E1FF; }
+        .presence { background: #D4FFC1; }
+    </style>
+</head>
+
+<body>
+    <h1>Statut des Capteurs</h1>
+    <div class="container">
+        <div class="box temperature">
+            <h2>Température</h2>
+            <p id="temperature">-- °C</p>
+        </div>
+        <div class="box humidite">
+            <h2>Humidité</h2>
+            <p id="humidite">-- %</p>
+        </div>
+        <div class="box presence">
+            <h2>Présence</h2>
+            <p id="presence">--</p>
+        </div>
+    </div>
+
+    <script>
+        function updateCapteurs() {
+            fetch('/capteurs')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("temperature").textContent = data.temperature.toFixed(2) + " °C";
+                    document.getElementById("humidite").textContent = data.humidite.toFixed(2) + " %";
+                    document.getElementById("presence").textContent = data.presence ? "Détectée" : "Aucune";
+                });
+        }
+        setInterval(updateCapteurs, 1000);
+        updateCapteurs();
+    </script>
+<h2>Contrôle des Actionneurs</h2>
+<div class="container">
+    <div class="box">
+        <h2>Ventilateur</h2>
+        <button onclick="envoyerCommande('/commande_ventilateur', 0)">OFF</button>
+        <button onclick="envoyerCommande('/commande_ventilateur', 1)">Niveau 1</button>
+        <button onclick="envoyerCommande('/commande_ventilateur', 2)">Niveau 2</button>
+        <button onclick="envoyerCommande('/commande_ventilateur', 3)">Niveau 3</button>
+    </div>
+    <div class="box">
+        <h2>LED</h2>
+        <button onclick="envoyerCommande('/commande_led', 0)">OFF</button>
+        <button onclick="envoyerCommande('/commande_led', 1)">ON</button>
+    </div>
+</div>
+
+<script>
+    function envoyerCommande(url, valeur) {
+        fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ data: valeur })
+        });
+    }
+</script>
+<p>État du Ventilateur : <span id="etat_ventilateur">OFF</span></p>
+<p>État de la LED : <span id="etat_led">OFF</span></p>
+
+<script>
+function updateCapteurs() {
+    fetch('/capteurs')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("etat_ventilateur").innerText = 
+                data.ventilateur === 0 ? "OFF" : "Niveau " + data.ventilateur;
+            document.getElementById("etat_led").innerText = 
+                data.led === 0 ? "OFF" : "ON";
+        });
+}
+setInterval(updateCapteurs, 2000); // Rafraîchissement toutes les 2 sec
+</script>
+
+
+</body>
+</html>
+
+
+
